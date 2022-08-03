@@ -2,48 +2,60 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class InputHandler : MonoBehaviour
+namespace SG
 {
-    [SerializeField] float horizontal;
-    [SerializeField] float vertical;
-    [SerializeField] float moveAmount;
-    [SerializeField] float mouseX;
-    [SerializeField] float mouseY;
-
-    PlayerController inputActions;
-
-    Vector2 movementInput;
-    Vector2 cameraInput;
-
-    private void OnEnable()
+    public class InputHandler : MonoBehaviour
     {
-        if (inputActions == null)
+        [SerializeField] public float horizontal;
+        [SerializeField] public float vertical;
+        [SerializeField] public float moveAmount;
+        [SerializeField] float mouseX;
+        [SerializeField] float mouseY;
+
+        [HideInInspector]
+        AnimatorHandler animatorHandler;
+
+        PlayerController inputActions;
+
+        Vector2 movementInput;
+        Vector2 cameraInput;
+
+        private void Start()
         {
-            inputActions = new PlayerController();
-            inputActions.PlayerMovement.Movement.performed += inputActions => movementInput = inputActions.ReadValue<Vector2>();
-            inputActions.PlayerMovement.Camera.performed += i => cameraInput = i.ReadValue<Vector2>();
+            animatorHandler = GetComponentInChildren<AnimatorHandler>();
         }
 
-        inputActions.Enable();
-    }
+        private void OnEnable()
+        {
+            if (inputActions == null)
+            {
+                inputActions = new PlayerController();
+                inputActions.PlayerMovement.Movement.performed += inputActions => movementInput = inputActions.ReadValue<Vector2>();
+                inputActions.PlayerMovement.Camera.performed += i => cameraInput = i.ReadValue<Vector2>();
+            }
 
-    private void OnDisable()
-    {
-        inputActions.Disable();
-    }
+            inputActions.Enable();
+        }
 
-    void TickInput(float delta)
-    {
+        private void OnDisable()
+        {
+            inputActions.Disable();
+        }
 
-    }
+        public void HandleInputs(float delta)
+        {
+            MoveInput(delta);
+        }
 
-    void MoveInput(float delta)
-    {
-        horizontal = movementInput.x;
-        vertical = movementInput.y;
+        void MoveInput(float delta)
+        {
+            horizontal = movementInput.x;
+            vertical = movementInput.y;
 
-        moveAmount = Mathf.Clamp01(Mathf.Abs(horizontal) + Mathf.Abs(vertical));
-        mouseX = cameraInput.x;
-        mouseY = cameraInput.y;
+            moveAmount = Mathf.Clamp01(Mathf.Abs(horizontal) + Mathf.Abs(vertical));
+            animatorHandler.UpdateAnimatorValues(moveAmount, 0);
+            mouseX = cameraInput.x;
+            mouseY = cameraInput.y;
+        }
     }
 }
