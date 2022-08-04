@@ -16,13 +16,30 @@ namespace SG
         AnimatorHandler animatorHandler;
 
         PlayerController inputActions;
-
+        CameraHandler cameraHandler;
         Vector2 movementInput;
         Vector2 cameraInput;
+
+        private void Awake()
+        {
+            cameraHandler = CameraHandler.singleton;
+        }
+
+
 
         private void Start()
         {
             animatorHandler = GetComponentInChildren<AnimatorHandler>();
+        }
+
+        private void FixedUpdate()
+        {
+            float delta = Time.fixedDeltaTime;
+            if (cameraHandler != null)
+            {
+                cameraHandler.FollowTarget(delta);
+                cameraHandler.HandleCameraRotation(delta, mouseX, mouseY);
+            }
         }
 
         private void OnEnable()

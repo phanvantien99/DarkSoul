@@ -40,6 +40,7 @@ namespace SG
             moveDirection = cameraObject.forward * inputHandler.vertical;
             moveDirection += cameraObject.right * inputHandler.horizontal;
             moveDirection.Normalize();
+            moveDirection.y = 0;
 
             moveDirection *= movementSpeed;
             Vector3 projectedVelocity = Vector3.ProjectOnPlane(moveDirection, normalVector);
