@@ -32,13 +32,13 @@ namespace SG
             animatorHandler = GetComponentInChildren<AnimatorHandler>();
         }
 
-        private void FixedUpdate()
+        private void LateUpdate()
         {
-            float delta = Time.fixedDeltaTime;
+            // float delta = Time.fixedDeltaTime;
             if (cameraHandler != null)
             {
-                cameraHandler.FollowTarget(delta);
-                cameraHandler.HandleCameraRotation(delta, mouseX, mouseY);
+                cameraHandler.FollowTarget();
+                cameraHandler.HandleCameraRotation(mouseX, mouseY);
             }
         }
 

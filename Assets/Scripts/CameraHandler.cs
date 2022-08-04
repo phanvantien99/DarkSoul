@@ -8,16 +8,17 @@ public class CameraHandler : MonoBehaviour
     [SerializeField] Transform targetTransform;
     [SerializeField] Transform cameraPivot;
     [SerializeField] Transform cameraTransform;
-    Transform myTransform;
+    Vector3 cameraTransformPosition;
+    Vector3 cameraFollowVelocity = Vector3.zero;
     LayerMask ignoreLayers;
 
     [HideInInspector]
     public static CameraHandler singleton;
 
     [Header("Adjustment")]
-    [SerializeField] float lookSpeed = 0.1f;
-    [SerializeField] float followSpeed = 0.1f;
-    [SerializeField] float pivotSpeed = 0.03f;
+    [SerializeField] float lookSpeed = 2;
+    [SerializeField] float followSpeed = 0.2f;
+    [SerializeField] float pivotSpeed = 2;
 
     float defaultPosition;
     float lookAngle;
@@ -27,39 +28,73 @@ public class CameraHandler : MonoBehaviour
     [SerializeField] float maximumPivot = 35;
 
 
+    float targetPosition;
+    public float cameraSphereRadius = 0.2f;
+    public float cameraCollisionOffSet = 0.2f;
+    public float minimumCollisionOffSet = 0.2f;
+
     private void Awake()
     {
         singleton = this;
-        myTransform = transform;
         defaultPosition = cameraTransform.localPosition.z;
         ignoreLayers = ~(1 << 8 | 1 << 9 | 1 << 10);
     }
 
-    public void FollowTarget(float delta)
+    public void FollowTarget()
     {
         // get direction for camera
         // Lerp return a vector3 from a(camera) position to b(target) position within define time;
-        Vector3 target = Vector3.Lerp(myTransform.position, targetTransform.position, delta / followSpeed);
-        myTransform.position = target;
+        Vector3 target = Vector3.SmoothDamp
+            (transform.position, targetTransform.position, ref cameraFollowVelocity, followSpeed);
+        transform.position = target;
+
+        HandleCameraCollision();
     }
 
-    public void HandleCameraRotation(float delta, float mouseX, float mouseY)
+    public void HandleCameraRotation(float mouseX, float mouseY)
     {
-        lookAngle += (mouseX * lookSpeed) / delta;
-        pivotAngle -= (mouseY * lookSpeed) / delta;
+        lookAngle += (mouseX * lookSpeed);
+        pivotAngle -= (mouseY * pivotSpeed);
         pivotAngle = Mathf.Clamp(pivotAngle, minimumPivot, maximumPivot);
 
 
         Vector3 rotation = Vector3.zero;
         rotation.y = lookAngle;
         Quaternion targetRotation = Quaternion.Euler(rotation);
-        myTransform.rotation = targetRotation;
+        transform.rotation = targetRotation;
 
         rotation = Vector3.zero;
         rotation.x = pivotAngle;
 
         targetRotation = Quaternion.Euler(rotation);
         cameraPivot.localRotation = targetRotation;
+
+    }
+
+    void HandleCameraCollision()
+    {
+        targetPosition = defaultPosition;
+        RaycastHit hit;
+        Vector3 direction = cameraTransform.position - cameraPivot.position;
+        direction.Normalize();
+
+
+
+        if (Physics.SphereCast(cameraPivot.position, cameraSphereRadius, direction, out hit, Mathf.Abs(targetPosition), ignoreLayers))
+        {
+            float dis = Vector3.Distance(cameraPivot.position, hit.point);
+            targetPosition = -(dis - cameraCollisionOffSet);
+
+
+        }
+        if (Mathf.Abs(targetPosition) < minimumCollisionOffSet)
+        {
+            targetPosition = -minimumCollisionOffSet;
+        }
+
+
+        cameraTransformPosition.z = Mathf.Lerp(cameraTransform.localPosition.z, targetPosition, 0.2f);
+        cameraTransform.localPosition = cameraTransformPosition;
 
     }
 

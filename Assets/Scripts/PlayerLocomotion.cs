@@ -31,6 +31,7 @@ namespace SG
             animatorHandler = GetComponentInChildren<AnimatorHandler>();
             myTransform = transform;
             animatorHandler.Initialize();
+            Cursor.lockState = CursorLockMode.Locked;
         }
 
         private void Update()
