@@ -25,7 +25,6 @@ namespace SG
 
             float v = SnappedAnimator(verticalMovement);
             float h = SnappedAnimator(horizontalMovement);
-            Debug.Log(v);
             anim.SetFloat(vertical, v, 0.1f, Time.deltaTime);
             anim.SetFloat(horizontal, h, 0.1f, Time.deltaTime);
         }

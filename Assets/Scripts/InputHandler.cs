@@ -24,9 +24,6 @@ namespace SG
         {
             cameraHandler = CameraHandler.singleton;
         }
-
-
-
         private void Start()
         {
             animatorHandler = GetComponentInChildren<AnimatorHandler>();
@@ -34,7 +31,6 @@ namespace SG
 
         private void LateUpdate()
         {
-            // float delta = Time.fixedDeltaTime;
             if (cameraHandler != null)
             {
                 cameraHandler.FollowTarget();

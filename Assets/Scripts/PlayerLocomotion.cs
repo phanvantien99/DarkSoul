@@ -38,6 +38,12 @@ namespace SG
         {
             float delta = Time.deltaTime;
             inputHandler.HandleInputs(delta);
+        }
+
+        private void FixedUpdate()
+        {
+            // float delta = Time.deltaTime;
+
             moveDirection = cameraObject.forward * inputHandler.vertical;
             moveDirection += cameraObject.right * inputHandler.horizontal;
             moveDirection.Normalize();
@@ -49,14 +55,14 @@ namespace SG
 
             if (animatorHandler.canRotate)
             {
-                HandleRotation(delta);
+                HandleRotation();
             }
         }
 
         #region Movement
         Vector3 normalVector;
         Vector3 targetPosition;
-        void HandleRotation(float delta)
+        void HandleRotation()
         {
             Vector3 targetDirection = Vector3.zero;
             // float moveOverride = inputHandler.moveAmount;
@@ -72,7 +78,7 @@ namespace SG
             }
             float rs = rotationSpeed;
             Quaternion tr = Quaternion.LookRotation(targetDirection);
-            Quaternion targetRotation = Quaternion.Slerp(myTransform.rotation, tr, rs * delta);
+            Quaternion targetRotation = Quaternion.Slerp(myTransform.rotation, tr, rs * Time.deltaTime);
             myTransform.rotation = targetRotation;
         }
 
