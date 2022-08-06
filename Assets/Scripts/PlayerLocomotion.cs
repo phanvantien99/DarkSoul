@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 
-namespace SG
+namespace ME
 {
     public class PlayerLocomotion : MonoBehaviour
     {
@@ -18,11 +18,12 @@ namespace SG
         public AnimatorHandler animatorHandler;
 
         public GameObject normalCamera;
-        Rigidbody rigidbodyPlayer;
+        public Rigidbody rigidbodyPlayer;
 
         [Header("Status")]
         [SerializeField] float movementSpeed = 5;
         [SerializeField] float rotationSpeed = 10;
+
 
         private void Start()
         {
@@ -37,12 +38,16 @@ namespace SG
         private void Update()
         {
             float delta = Time.deltaTime;
-            inputHandler.HandleInputs(delta);
+            inputHandler.HandleInputs();
         }
 
         private void FixedUpdate()
         {
-            // float delta = Time.deltaTime;
+            HandleMovement();
+            HandleRollingAndSprinting();
+        }
+        public void HandleMovement()
+        {
 
             moveDirection = cameraObject.forward * inputHandler.vertical;
             moveDirection += cameraObject.right * inputHandler.horizontal;
@@ -59,6 +64,8 @@ namespace SG
             }
         }
 
+
+
         #region Movement
         Vector3 normalVector;
         Vector3 targetPosition;
@@ -67,7 +74,7 @@ namespace SG
             Vector3 targetDirection = Vector3.zero;
             // float moveOverride = inputHandler.moveAmount;
 
-            targetDirection = cameraObject.transform.forward * inputHandler.vertical;
+            targetDirection = cameraObject.transform.forward * inputHandler.vertical; // follow direction of camera => if player press vertical then it's will rotate
             targetDirection += cameraObject.right * inputHandler.horizontal;
             targetDirection.Normalize();
             targetDirection.y = 0;
@@ -82,6 +89,23 @@ namespace SG
             myTransform.rotation = targetRotation;
         }
 
+        void HandleRollingAndSprinting()
+        {
+            if (animatorHandler.anim.GetBool("isInteracting")) return;
+            if (inputHandler.rollFlag)
+            {
+                moveDirection = cameraObject.forward * inputHandler.vertical;
+                moveDirection += cameraObject.right * inputHandler.horizontal;
+
+                if (inputHandler.moveAmount > 0)
+                {
+                    animatorHandler.PlayTargetAnimation("Rolling 1", true);
+                    moveDirection.y = 0;
+                    Quaternion rollRotation = Quaternion.LookRotation(moveDirection);
+                    myTransform.rotation = rollRotation;
+                }
+            }
+        }
         #endregion
 
     }

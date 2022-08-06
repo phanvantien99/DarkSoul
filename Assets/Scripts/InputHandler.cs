@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace SG
+namespace ME
 {
     public class InputHandler : MonoBehaviour
     {
@@ -11,7 +11,9 @@ namespace SG
         [SerializeField] public float moveAmount;
         [SerializeField] float mouseX;
         [SerializeField] float mouseY;
-
+        bool b_Input;
+        public bool isInteracting;
+        [HideInInspector] public bool rollFlag;
         [HideInInspector]
         AnimatorHandler animatorHandler;
 
@@ -55,12 +57,14 @@ namespace SG
             inputActions.Disable();
         }
 
-        public void HandleInputs(float delta)
+
+        public void HandleInputs()
         {
-            MoveInput(delta);
+            MoveInput();
+            HandleRollInput();
         }
 
-        void MoveInput(float delta)
+        void MoveInput()
         {
             horizontal = movementInput.x;
             vertical = movementInput.y;
@@ -69,6 +73,15 @@ namespace SG
             animatorHandler.UpdateAnimatorValues(moveAmount, 0);
             mouseX = cameraInput.x;
             mouseY = cameraInput.y;
+        }
+
+        void HandleRollInput()
+        {
+            b_Input = inputActions.PlayerActions.Roll.triggered;
+            if (b_Input)
+            {
+                rollFlag = true;
+            }
         }
     }
 }
