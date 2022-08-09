@@ -6,16 +6,19 @@ namespace ME
 {
     public class InputHandler : MonoBehaviour
     {
+        [Header("Props")]
         [SerializeField] public float horizontal;
         [SerializeField] public float vertical;
         [SerializeField] public float moveAmount;
         [SerializeField] float mouseX;
         [SerializeField] float mouseY;
-        bool b_Input;
+        bool _rollInput;
+        bool _sprintInput;
         public bool isInteracting;
-        [HideInInspector] public bool rollFlag;
-        [HideInInspector]
-        AnimatorHandler animatorHandler;
+        [Header("Flag")]
+        public bool rollFlag;
+        public bool sprintFlag;
+        [HideInInspector] AnimatorHandler animatorHandler;
 
         PlayerController inputActions;
         CameraHandler cameraHandler;
@@ -45,7 +48,9 @@ namespace ME
             if (inputActions == null)
             {
                 inputActions = new PlayerController();
-                inputActions.PlayerMovement.Movement.performed += inputActions => movementInput = inputActions.ReadValue<Vector2>();
+                inputActions.PlayerMovement.Movement.performed += inputActions =>
+                    movementInput = inputActions.ReadValue<Vector2>();
+
                 inputActions.PlayerMovement.Camera.performed += i => cameraInput = i.ReadValue<Vector2>();
             }
 
@@ -62,6 +67,7 @@ namespace ME
         {
             MoveInput();
             HandleRollInput();
+            HandleSprint();
         }
 
         void MoveInput()
@@ -70,18 +76,31 @@ namespace ME
             vertical = movementInput.y;
 
             moveAmount = Mathf.Clamp01(Mathf.Abs(horizontal) + Mathf.Abs(vertical));
-            animatorHandler.UpdateAnimatorValues(moveAmount, 0);
+
             mouseX = cameraInput.x;
             mouseY = cameraInput.y;
         }
 
         void HandleRollInput()
         {
-            b_Input = inputActions.PlayerActions.Roll.triggered;
-            if (b_Input)
+            // b_Input = inputActions.PlayerActions.Roll.triggered;
+            _rollInput = inputActions.PlayerActions.Roll.phase == UnityEngine.InputSystem.InputActionPhase.Performed;
+            if (_rollInput)
             {
                 rollFlag = true;
             }
         }
+
+        void HandleSprint()
+        {
+            _sprintInput = inputActions.PlayerActions.Sprint.phase == UnityEngine.InputSystem.InputActionPhase.Performed;
+            if (_sprintInput)
+            {
+                sprintFlag = true;
+            }
+
+        }
+
+
     }
 }

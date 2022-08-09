@@ -24,6 +24,8 @@ namespace ME
         [SerializeField] float movementSpeed = 5;
         [SerializeField] float rotationSpeed = 10;
 
+        public bool isSprinting;
+
 
         private void Start()
         {
@@ -37,18 +39,19 @@ namespace ME
 
         private void Update()
         {
-            float delta = Time.deltaTime;
             inputHandler.HandleInputs();
+
+            HandleRollingAndSprinting();
+
         }
 
         private void FixedUpdate()
         {
             HandleMovement();
-            HandleRollingAndSprinting();
         }
+
         public void HandleMovement()
         {
-
             moveDirection = cameraObject.forward * inputHandler.vertical;
             moveDirection += cameraObject.right * inputHandler.horizontal;
             moveDirection.Normalize();
@@ -57,7 +60,7 @@ namespace ME
             moveDirection *= movementSpeed;
             Vector3 projectedVelocity = Vector3.ProjectOnPlane(moveDirection, normalVector);
             rigidbodyPlayer.velocity = projectedVelocity;
-
+            animatorHandler.UpdateAnimatorValues(inputHandler.moveAmount, isSprinting);
             if (animatorHandler.canRotate)
             {
                 HandleRotation();
@@ -94,15 +97,15 @@ namespace ME
             if (animatorHandler.anim.GetBool("isInteracting")) return;
             if (inputHandler.rollFlag)
             {
-                moveDirection = cameraObject.forward * inputHandler.vertical;
-                moveDirection += cameraObject.right * inputHandler.horizontal;
+                // moveDirection = cameraObject.forward * inputHandler.vertical;
+                // moveDirection += cameraObject.right * inputHandler.horizontal;
 
                 if (inputHandler.moveAmount > 0)
                 {
                     animatorHandler.PlayTargetAnimation("Rolling 1", true);
-                    moveDirection.y = 0;
-                    Quaternion rollRotation = Quaternion.LookRotation(moveDirection);
-                    myTransform.rotation = rollRotation;
+                    // moveDirection.y = 0;
+                    // Quaternion rollRotation = Quaternion.LookRotation(moveDirection);
+                    // myTransform.rotation = rollRotation;
                 }
             }
         }

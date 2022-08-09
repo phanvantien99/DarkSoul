@@ -160,17 +160,37 @@
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": false
+                },
+                {
+                    "name": "Sprint",
+                    "type": "Button",
+                    "id": "f6cb9359-a30f-404c-a417-5d9f274cfd6c",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
                 }
             ],
             "bindings": [
                 {
                     "name": "",
                     "id": "20151621-5d20-4fa0-9be8-d53fc3b43fa3",
+                    "path": "<Keyboard>/leftCtrl",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Roll",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "a327edc5-eede-460f-86de-21dad2a747df",
                     "path": "<Keyboard>/leftShift",
                     "interactions": "Press",
                     "processors": "",
                     "groups": "",
-                    "action": "Roll",
+                    "action": "Sprint",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }

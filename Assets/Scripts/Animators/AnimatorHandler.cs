@@ -30,13 +30,15 @@ namespace ME
             anim.SetBool("isInteracting", isInteract);
             anim.CrossFade(targetAnimate, 0.2f);
         }
-        public void UpdateAnimatorValues(float verticalMovement, float horizontalMovement)
+        public void UpdateAnimatorValues(float verticalMovement, bool isSprinting)
         {
 
+
             float v = SnappedAnimator(verticalMovement);
-            // float h = SnappedAnimator(horizontalMovement);
+
+            if (isSprinting) v = 2;
             anim.SetFloat(vertical, v, 0.1f, Time.deltaTime);
-            // anim.SetFloat(horizontal, h, 0.1f, Time.deltaTime);
+
         }
 
         float SnappedAnimator(float movement)
@@ -56,12 +58,13 @@ namespace ME
         {
             if (!inputHandler.isInteracting) return;
 
-            float delta = Time.deltaTime;
+            // float delta = Time.deltaTime;
+
             playerLoco.rigidbodyPlayer.drag = 0;
             Vector3 deltaPosition = anim.deltaPosition;
             deltaPosition.y = 0;
-            Vector3 velocity = deltaPosition / delta;
-            playerLoco.rigidbodyPlayer.velocity = velocity;
+            // Vector3 velocity = deltaPosition;
+            playerLoco.rigidbodyPlayer.velocity = deltaPosition;
         }
 
         public void CanRotate()
