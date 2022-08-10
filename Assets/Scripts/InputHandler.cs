@@ -10,11 +10,11 @@ namespace ME
         [SerializeField] public float horizontal;
         [SerializeField] public float vertical;
         [SerializeField] public float moveAmount;
-        [SerializeField] float mouseX;
-        [SerializeField] float mouseY;
+        public float mouseX;
+        public float mouseY;
         bool _rollInput;
         bool _sprintInput;
-        public bool isInteracting;
+
         [Header("Flag")]
         [HideInInspector] public bool rollFlag;
         [HideInInspector] public bool sprintFlag;
@@ -25,23 +25,13 @@ namespace ME
         Vector2 movementInput;
         Vector2 cameraInput;
 
-        private void Awake()
-        {
-            cameraHandler = CameraHandler.singleton;
-        }
+
         private void Start()
         {
             animatorHandler = GetComponentInChildren<AnimatorHandler>();
         }
 
-        private void LateUpdate()
-        {
-            if (cameraHandler != null)
-            {
-                cameraHandler.FollowTarget();
-                cameraHandler.HandleCameraRotation(mouseX, mouseY);
-            }
-        }
+
 
         private void OnEnable()
         {

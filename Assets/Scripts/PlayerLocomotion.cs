@@ -10,23 +10,22 @@ namespace ME
         [Header("Target")]
         [SerializeField] Transform cameraObject;
         InputHandler inputHandler;
+        PlayerManager playerManager;
         Vector3 moveDirection;
 
-        [HideInInspector]
-        public Transform myTransform;
-        [HideInInspector]
-        public AnimatorHandler animatorHandler;
+        [HideInInspector] Transform myTransform;
 
-        public GameObject normalCamera;
+        [HideInInspector] AnimatorHandler animatorHandler;
+
         public Rigidbody rigidbodyPlayer;
 
-        [Header("Status")]
+        [Header("Movement Stats")]
         [SerializeField] float movementSpeed = 5;
         [SerializeField] float sprintSpeed = 10;
         [SerializeField] float rotationSpeed = 10;
         [SerializeField] float playerSpeed = 0;
 
-        [SerializeField] bool isSprinting;
+        // [SerializeField] bool isSprinting;
 
 
         private void Start()
@@ -34,27 +33,26 @@ namespace ME
             rigidbodyPlayer = GetComponent<Rigidbody>();
             inputHandler = GetComponent<InputHandler>();
             animatorHandler = GetComponentInChildren<AnimatorHandler>();
+            playerManager = GetComponent<PlayerManager>();
             myTransform = transform;
             animatorHandler.Initialize();
-            Cursor.lockState = CursorLockMode.Locked;
+
         }
 
-        private void Update()
+
+
+        public void HandleAllExtraMovement()
         {
-            inputHandler.HandleInputs();
+            // inputHandler.HandleInputs();
             playerSpeed = HandlePlayerSpeed();
-            HandleRollingAndSprinting();
-
+            HandleRolling();
         }
 
-        private void FixedUpdate()
-        {
-            HandleMovement();
-        }
+
 
         #region Movement
 
-        public void HandleMovement()
+        public void HandleMovement(bool isSprinting)
         {
 
             if (inputHandler.rollFlag) return;
@@ -80,13 +78,12 @@ namespace ME
 
             if (inputHandler.sprintFlag)
             {
-
-                isSprinting = true; // active animation in HandleMovement
+                playerManager.isSprinting = true; // active animation in HandleMovement (Code in PlayerManager)
                 return sprintSpeed;
             }
             else // if !sprintFlag then de-active animation
             {
-                isSprinting = false;
+                playerManager.isSprinting = false;
                 return movementSpeed;
             }
 
@@ -114,7 +111,7 @@ namespace ME
             myTransform.rotation = targetRotation;
         }
 
-        void HandleRollingAndSprinting()
+        void HandleRolling()
         {
             if (animatorHandler.anim.GetBool("isInteracting")) return;
             if (inputHandler.rollFlag)

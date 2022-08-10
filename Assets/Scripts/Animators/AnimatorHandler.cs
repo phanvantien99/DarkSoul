@@ -11,6 +11,7 @@ namespace ME
         public Animator anim;
         [SerializeField] InputHandler inputHandler;
         [SerializeField] PlayerLocomotion playerLoco;
+        PlayerManager playerManager;
         int vertical;
         int horizontal;
         public bool canRotate;
@@ -23,6 +24,7 @@ namespace ME
             horizontal = Animator.StringToHash("Horizontal");
             inputHandler = GetComponentInParent<InputHandler>();
             playerLoco = GetComponentInParent<PlayerLocomotion>();
+            playerManager = GetComponentInParent<PlayerManager>();
         }
 
         public void PlayTargetAnimation(string targetAnimate, bool isInteract)
@@ -57,7 +59,7 @@ namespace ME
 
         private void OnAnimatorMove()
         {
-            if (!inputHandler.isInteracting) return;
+            if (!playerManager.isInteracting) return;
 
             // float delta = Time.deltaTime;
 

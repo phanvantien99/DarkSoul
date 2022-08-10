@@ -9,18 +9,50 @@ namespace ME
 
         InputHandler inputHandler;
         Animator anime;
+        public bool isInteracting;
+        CameraHandler cameraHandler;
+        PlayerLocomotion playerLocomotion;
+
+        public bool isSprinting;
+
+        private void Awake()
+        {
+            cameraHandler = CameraHandler.singleton;
+        }
+
         void Start()
         {
             inputHandler = GetComponent<InputHandler>();
             anime = GetComponentInChildren<Animator>();
+            playerLocomotion = GetComponent<PlayerLocomotion>();
+            Cursor.lockState = CursorLockMode.Locked;
         }
 
         // Update is called once per frame
         void Update()
         {
-            inputHandler.isInteracting = anime.GetBool("isInteracting");
+            isInteracting = anime.GetBool("isInteracting");
+            inputHandler.HandleInputs();
+            playerLocomotion.HandleAllExtraMovement();
+        }
+
+
+        private void FixedUpdate()
+        {
+            playerLocomotion.HandleMovement(isSprinting);
+        }
+
+
+        private void LateUpdate()
+        {
             inputHandler.rollFlag = false;
             inputHandler.sprintFlag = false;
+
+            if (cameraHandler != null)
+            {
+                cameraHandler.FollowTarget();
+                cameraHandler.HandleCameraRotation(inputHandler.mouseX, inputHandler.mouseY);
+            }
         }
     }
 }
