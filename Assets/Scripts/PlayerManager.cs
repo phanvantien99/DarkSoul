@@ -20,6 +20,7 @@ namespace ME
         {
             inputHandler.isInteracting = anime.GetBool("isInteracting");
             inputHandler.rollFlag = false;
+            inputHandler.sprintFlag = false;
         }
     }
 }

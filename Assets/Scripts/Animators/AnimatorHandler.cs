@@ -13,8 +13,9 @@ namespace ME
         [SerializeField] PlayerLocomotion playerLoco;
         int vertical;
         int horizontal;
-
         public bool canRotate;
+
+
         public void Initialize()
         {
             anim = GetComponent<Animator>();

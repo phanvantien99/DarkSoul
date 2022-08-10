@@ -404,8 +404,10 @@ MonoBehaviour:
   animatorHandler: {fileID: 0}
   normalCamera: {fileID: 0}
   rigidbodyPlayer: {fileID: 0}
-  movementSpeed: 3
+  movementSpeed: 5
+  sprintSpeed: 7
   rotationSpeed: 10
+  playerSpeed: 0
   isSprinting: 0
 --- !u!114 &396498290
 MonoBehaviour:
@@ -541,7 +543,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: 87cc0116a3623f4459fc38ce7afc6d8d, type: 3}
       propertyPath: m_IsActive
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 5866666021909216657, guid: 87cc0116a3623f4459fc38ce7afc6d8d, type: 3}
       propertyPath: m_Controller
@@ -1227,7 +1229,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6299698692133528069, guid: c55851aef4eed7b45b358919d1e2be4a, type: 3}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 6640230244297799871, guid: c55851aef4eed7b45b358919d1e2be4a, type: 3}
       propertyPath: m_RootOrder

@@ -16,8 +16,8 @@ namespace ME
         bool _sprintInput;
         public bool isInteracting;
         [Header("Flag")]
-        public bool rollFlag;
-        public bool sprintFlag;
+        [HideInInspector] public bool rollFlag;
+        [HideInInspector] public bool sprintFlag;
         [HideInInspector] AnimatorHandler animatorHandler;
 
         PlayerController inputActions;
@@ -96,9 +96,9 @@ namespace ME
             _sprintInput = inputActions.PlayerActions.Sprint.phase == UnityEngine.InputSystem.InputActionPhase.Performed;
             if (_sprintInput)
             {
+
                 sprintFlag = true;
             }
-
         }
 
 

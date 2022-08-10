@@ -22,9 +22,11 @@ namespace ME
 
         [Header("Status")]
         [SerializeField] float movementSpeed = 5;
+        [SerializeField] float sprintSpeed = 10;
         [SerializeField] float rotationSpeed = 10;
+        [SerializeField] float playerSpeed = 0;
 
-        public bool isSprinting;
+        [SerializeField] bool isSprinting;
 
 
         private void Start()
@@ -40,7 +42,7 @@ namespace ME
         private void Update()
         {
             inputHandler.HandleInputs();
-
+            playerSpeed = HandlePlayerSpeed();
             HandleRollingAndSprinting();
 
         }
@@ -50,14 +52,20 @@ namespace ME
             HandleMovement();
         }
 
+        #region Movement
+
         public void HandleMovement()
         {
+
+            if (inputHandler.rollFlag) return;
+
             moveDirection = cameraObject.forward * inputHandler.vertical;
             moveDirection += cameraObject.right * inputHandler.horizontal;
             moveDirection.Normalize();
             moveDirection.y = 0;
 
-            moveDirection *= movementSpeed;
+            moveDirection *= playerSpeed;
+
             Vector3 projectedVelocity = Vector3.ProjectOnPlane(moveDirection, normalVector);
             rigidbodyPlayer.velocity = projectedVelocity;
             animatorHandler.UpdateAnimatorValues(inputHandler.moveAmount, isSprinting);
@@ -67,9 +75,23 @@ namespace ME
             }
         }
 
+        float HandlePlayerSpeed()
+        {
 
+            if (inputHandler.sprintFlag)
+            {
 
-        #region Movement
+                isSprinting = true; // active animation in HandleMovement
+                return sprintSpeed;
+            }
+            else // if !sprintFlag then de-active animation
+            {
+                isSprinting = false;
+                return movementSpeed;
+            }
+
+        }
+
         Vector3 normalVector;
         Vector3 targetPosition;
         void HandleRotation()
