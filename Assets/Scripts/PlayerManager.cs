@@ -13,7 +13,10 @@ namespace ME
         CameraHandler cameraHandler;
         PlayerLocomotion playerLocomotion;
 
+        [Header("Player Flags")]
         public bool isSprinting;
+        public bool isInAir;
+        public bool isGrounded;
 
         private void Awake()
         {
@@ -34,6 +37,7 @@ namespace ME
             isInteracting = anime.GetBool("isInteracting");
             inputHandler.HandleInputs();
             playerLocomotion.HandleAllExtraMovement();
+
         }
 
 
@@ -53,6 +57,14 @@ namespace ME
                 cameraHandler.FollowTarget();
                 cameraHandler.HandleCameraRotation(inputHandler.mouseX, inputHandler.mouseY);
             }
+            HandleInTheAir();
         }
+
+        void HandleInTheAir()
+        {
+            if (isInAir)
+                playerLocomotion.inAirTimer += Time.deltaTime;
+        }
+
     }
 }

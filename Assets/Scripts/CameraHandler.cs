@@ -65,7 +65,6 @@ public class CameraHandler : MonoBehaviour
 
         rotation = Vector3.zero;
         rotation.x = pivotAngle;
-
         targetRotation = Quaternion.Euler(rotation);
         cameraPivot.localRotation = targetRotation;
 
