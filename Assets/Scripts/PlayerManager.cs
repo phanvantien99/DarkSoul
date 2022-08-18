@@ -34,7 +34,6 @@ namespace ME
         // Update is called once per frame
         void Update()
         {
-            isInteracting = anime.GetBool("isInteracting");
             inputHandler.HandleInputs();
             playerLocomotion.HandleAllExtraMovement();
 
@@ -51,20 +50,17 @@ namespace ME
         {
             inputHandler.rollFlag = false;
             inputHandler.sprintFlag = false;
+            isInteracting = anime.GetBool("isInteracting");
 
             if (cameraHandler != null)
             {
                 cameraHandler.FollowTarget();
                 cameraHandler.HandleCameraRotation(inputHandler.mouseX, inputHandler.mouseY);
             }
-            HandleInTheAir();
+
         }
 
-        void HandleInTheAir()
-        {
-            if (isInAir)
-                playerLocomotion.inAirTimer += Time.deltaTime;
-        }
+     
 
     }
 }

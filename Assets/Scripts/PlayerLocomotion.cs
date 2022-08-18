@@ -11,6 +11,7 @@ namespace ME
         [SerializeField] Transform cameraObject;
         InputHandler inputHandler;
         PlayerManager playerManager;
+        [SerializeField] Transform groundFlag;
         Vector3 moveDirection;
         [HideInInspector] Transform myTransform;
         [HideInInspector] AnimatorHandler animatorHandler;
@@ -22,15 +23,15 @@ namespace ME
         [SerializeField] float sprintSpeed = 10;
         [SerializeField] float rotationSpeed = 10;
         [SerializeField] float playerSpeed = 0;
+
+        [Header("Falling")]
+        [SerializeField] LayerMask groundLayers;
+        [SerializeField] float inAirTimer;
+        [SerializeField] float leapVelocity;
         [SerializeField] float fallingSpeed = 45;
+        [SerializeField] float rayCastHeightOffSet = 0.21f;
 
-        [Header("Ground & Air Detection Stats")]
-        [SerializeField] float groundDetectionStartPoint = 0.5f;
-        [SerializeField] float minimumDistanceToBeginFall = 1f;
-        [SerializeField] float groundDirectionRayDistance = 0.2f;
-        LayerMask ignoreForGroundCheck;
-        public float inAirTimer;
-
+        // [HideInInspector] public float 
 
         private void Start()
         {
@@ -42,15 +43,12 @@ namespace ME
             animatorHandler.Initialize();
 
             playerManager.isGrounded = true;
-            ignoreForGroundCheck = ~(1 << 8 | 1 << 11);
+
         }
         public void HandleAllExtraMovement()
         {
-            // inputHandler.HandleInputs();
             playerSpeed = HandlePlayerSpeed();
             HandleRolling();
-            // HandleGravity();
-            // HandleFalling();
             HandleFallingFixed();
         }
 
@@ -58,7 +56,7 @@ namespace ME
 
         #region Movement
         Vector3 normalVector;
-        Vector3 targetPosition;
+        Vector3 targetPosition = Vector3.zero;
         public void HandleMovement(bool isSprinting)
         {
 
@@ -135,151 +133,64 @@ namespace ME
             }
         }
 
-        void HandleFalling()
-        {
-            // playerManager.isGrounded = false;
-            RaycastHit hit;
-            Vector3 origin = transform.position;
-            origin.y += groundDetectionStartPoint;
-            // if (Physics.Raycast(origin, transform.forward, out hit, 0.4f))
-            // {
-            //     moveDirection = Vector3.zero;
-            // }
-            // if (playerManager.isInAir)
-            // {
-            //     rigidbodyPlayer.AddForce(Vector3.down * fallingSpeed);
-            //     rigidbodyPlayer.AddForce(moveDirection * fallingSpeed / 10f); // not get stuck on the edge -> TRY COMMENT THIS LINE
-            // }
-            Vector3 dir = moveDirection;
-            dir.Normalize();
-            origin += dir * groundDirectionRayDistance;
-            targetPosition = transform.position;
-
-            Debug.DrawRay(origin, Vector3.down * groundDetectionStartPoint, Color.cyan, 0.1f, false);
-
-            if (Physics.Raycast(origin, Vector3.down, out hit, minimumDistanceToBeginFall, ignoreForGroundCheck)) // check is grounded == true?
-            {
-                normalVector = hit.normal;
-                Vector3 tp = hit.point;
-                playerManager.isGrounded = true;
-                targetPosition.y = tp.y;
-                if (playerManager.isInAir)
-                {
-                    if (inAirTimer > 0.5f)
-                    {
-                        Debug.Log("You are in the air for: " + inAirTimer);
-                        animatorHandler.PlayTargetAnimation("Landing", true);
-                        inAirTimer = 0;
-                    }
-                    else
-                    {
-                        animatorHandler.PlayTargetAnimation("Female Locomotion", false);
-                        inAirTimer = 0;
-                    }
-
-                    playerManager.isInAir = false;
-                }
-            }
-            else
-            {
-                if (playerManager.isGrounded)
-                {
-                    playerManager.isGrounded = false;
-                }
-                if (!playerManager.isInAir)
-                {
-                    if (playerManager.isInteracting == false)
-                    {
-                        animatorHandler.PlayTargetAnimation("Falling", true);
-                    }
-                    Vector3 velocity = rigidbodyPlayer.velocity;
-                    velocity.Normalize();
-                    rigidbodyPlayer.velocity = velocity * (movementSpeed / 2);
-                }
-                playerManager.isInAir = true;
-            }
-
-            if (playerManager.isGrounded)
-            {
-                if (playerManager.isInteracting || inputHandler.moveAmount > 0)
-                {
-                    transform.position = Vector3.Lerp(transform.position, targetPosition, Time.deltaTime);
-                }
-                else
-                {
-                    transform.position = targetPosition;
-                }
-            }
-
-        }
         #endregion
 
 
         void HandleFallingFixed()
         {
-            RaycastHit hit;
-            Vector3 origin = transform.position;
-            origin.y += groundDetectionStartPoint;
 
-            if (playerManager.isInAir)
+            Vector3 origin = groundFlag.position;
+            origin.y += 0.1f;
+
+            if (!playerManager.isGrounded)
             {
-                rigidbodyPlayer.AddForce(Vector3.down * fallingSpeed);
-                rigidbodyPlayer.AddForce(moveDirection * fallingSpeed / 10f);
-            }
-            Debug.DrawRay(origin, Vector3.down * minimumDistanceToBeginFall, Color.red, 0);
-            if (Physics.Raycast(origin, Vector3.down, out hit, minimumDistanceToBeginFall, ignoreForGroundCheck))
-            {
-
-                targetPosition = transform.position;
-                targetPosition.y = hit.point.y; // store the point that hit raycast position y
-
-                transform.position = targetPosition; // -> THE ERROR make it's go SLOWLY
-
-
-                playerManager.isGrounded = true;
-                if (playerManager.isInAir)
+                if (!playerManager.isInteracting)
                 {
-                    if (inAirTimer > 0.5f)
-                    {
-                        Debug.Log("You are in air for: " + inAirTimer);
-                        animatorHandler.PlayTargetAnimation("Landing", true);
-                        inAirTimer = 0;
-                    }
-                    else
-                    {
-                        animatorHandler.PlayTargetAnimation("Female Locomotion", false);
-                        inAirTimer = 0;
-                    }
-                    playerManager.isInAir = false;
+                    animatorHandler.PlayTargetAnimation("Falling", true);
                 }
+                inAirTimer += Time.deltaTime;
+                rigidbodyPlayer.AddForce(transform.forward * leapVelocity);
+                rigidbodyPlayer.AddForce(Vector3.down * fallingSpeed * inAirTimer);
+                playerManager.isInAir = true;
+            }
+
+            if (Physics.CheckSphere(origin, 0.11f, groundLayers))
+            {
+                if (!playerManager.isGrounded && playerManager.isInteracting)
+                {
+                    animatorHandler.PlayTargetAnimation("Landing", true);
+                }
+                playerManager.isGrounded = true;
+                inAirTimer = 0;
+                Debug.Log(true);
             }
             else
             {
-                if (playerManager.isGrounded) playerManager.isGrounded = false;
-                if (!playerManager.isInAir)
-                {
-                    if (!playerManager.isInteracting) animatorHandler.PlayTargetAnimation("Falling", true);
-                    rigidbodyPlayer.velocity *= (movementSpeed / 2);
-                }
-                playerManager.isInAir = true;
+                Debug.Log(false);
+                playerManager.isGrounded = false;
             }
+
         }
 
         private void OnDrawGizmosSelected()
         {
-            Gizmos.color = new Color(63, 199, 12);
             Vector3 temp = transform.position;
-            // temp.y += 0.5f;
-            Gizmos.DrawCube(temp, new Vector3(0.1f, 0.1f, 0.1f));
+            temp.y += 0.1f;
+            Gizmos.DrawWireSphere(temp, 0.101f);
         }
 
-        void HandleGravity()
+        bool DetectIsGrounded()
         {
-
-            if (playerManager.isInAir)
+            RaycastHit hit;
+            targetPosition = transform.position;
+            targetPosition.y += 0.2f;
+            Debug.Log(targetPosition);
+            if (Physics.Raycast(targetPosition, Vector3.down, out hit, 0.21f))
             {
-                rigidbodyPlayer.AddForce(Vector3.down * fallingSpeed, ForceMode.Impulse);
+                return true;
             }
+            return false;
         }
+
     }
 }
