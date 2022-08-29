@@ -6,16 +6,17 @@ public class UnderstandRayCast : MonoBehaviour
 {
     // Start is called before the first frame update
 
+    [SerializeField] LayerMask layerGround;
 
-    private void Start()
-    {
-        Debug.Log("123");
-    }
 
     private void Update()
     {
-        Debug.DrawRay(transform.position, Vector3.down, Color.red, 0);
-
+        Debug.Log(Physics.SphereCast(transform.position, 0.1f, Vector3.down, out RaycastHit hit, 0.16f, layerGround));
     }
 
+    private void OnDrawGizmosSelected()
+    {
+        Gizmos.DrawRay(transform.position, Vector3.down * 0.16f);
+        Gizmos.DrawWireSphere(transform.position, 0.1f);
+    }
 }

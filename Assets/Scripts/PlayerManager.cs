@@ -15,7 +15,6 @@ namespace ME
 
         [Header("Player Flags")]
         public bool isSprinting;
-        public bool isInAir;
         public bool isGrounded;
 
         private void Awake()
@@ -60,7 +59,7 @@ namespace ME
 
         }
 
-     
+
 
     }
 }

@@ -29,7 +29,7 @@ namespace ME
         [SerializeField] float inAirTimer;
         [SerializeField] float leapVelocity;
         [SerializeField] float fallingSpeed = 45;
-        [SerializeField] float rayCastHeightOffSet = 0.21f;
+        [SerializeField] float rayCastHeightOffSet = 0.5f;
 
         // [HideInInspector] public float 
 
@@ -41,9 +41,6 @@ namespace ME
             playerManager = GetComponent<PlayerManager>();
             myTransform = transform;
             animatorHandler.Initialize();
-
-            playerManager.isGrounded = true;
-
         }
         public void HandleAllExtraMovement()
         {
@@ -139,8 +136,12 @@ namespace ME
         void HandleFallingFixed()
         {
 
-            Vector3 origin = groundFlag.position;
-            origin.y += 0.1f;
+            // Vector3 origin = groundFlag.position;
+            RaycastHit hit;
+            Vector3 origin = transform.position;
+            origin.y += rayCastHeightOffSet;
+            Vector3 targetPosition;
+            targetPosition = transform.position;
 
             if (!playerManager.isGrounded)
             {
@@ -151,18 +152,21 @@ namespace ME
                 inAirTimer += Time.deltaTime;
                 rigidbodyPlayer.AddForce(transform.forward * leapVelocity);
                 rigidbodyPlayer.AddForce(Vector3.down * fallingSpeed * inAirTimer);
-                playerManager.isInAir = true;
             }
 
-            if (Physics.CheckSphere(origin, 0.11f, groundLayers))
+            // Debug.Log(Physics.SphereCast(origin, 0.2f, Vector3.down, out hit, 0.5f, groundLayers));
+            // Debug.Log(Physics.SphereCast(origin, 0.1f, Vector3.down, out hit, 0.5f, groundLayers));
+
+            if (Physics.SphereCast(origin, 0.1f, Vector3.down, out hit, 0.5f, groundLayers))
             {
                 if (!playerManager.isGrounded && playerManager.isInteracting)
-                {
                     animatorHandler.PlayTargetAnimation("Landing", true);
-                }
                 playerManager.isGrounded = true;
+                Vector3 rayCastHitPoint = hit.point;
+                targetPosition.y = rayCastHitPoint.y;
                 inAirTimer = 0;
-                Debug.Log(true);
+                playerManager.isInteracting = false;
+                Debug.Log(hit.point);
             }
             else
             {
@@ -170,20 +174,32 @@ namespace ME
                 playerManager.isGrounded = false;
             }
 
+            if (playerManager.isGrounded)
+            {
+                if (playerManager.isInteracting || inputHandler.moveAmount > 0)
+                {
+                    transform.position = Vector3.Lerp(transform.position, targetPosition, Time.deltaTime);
+                }
+                else
+                {
+                    transform.position = targetPosition;
+                }
+            }
         }
 
         private void OnDrawGizmosSelected()
         {
             Vector3 temp = transform.position;
-            temp.y += 0.1f;
-            Gizmos.DrawWireSphere(temp, 0.101f);
+            temp.y += rayCastHeightOffSet;
+            Gizmos.DrawRay(temp, Vector3.down * 0.5f);
+            Gizmos.DrawWireSphere(temp, 0.1f);
         }
 
         bool DetectIsGrounded()
         {
             RaycastHit hit;
             targetPosition = transform.position;
-            targetPosition.y += 0.2f;
+            targetPosition.y += 0.5f;
             Debug.Log(targetPosition);
             if (Physics.Raycast(targetPosition, Vector3.down, out hit, 0.21f))
             {

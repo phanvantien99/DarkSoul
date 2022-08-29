@@ -86,7 +86,6 @@ namespace ME
             _sprintInput = inputActions.PlayerActions.Sprint.phase == UnityEngine.InputSystem.InputActionPhase.Performed;
             if (_sprintInput)
             {
-
                 sprintFlag = true;
             }
         }
