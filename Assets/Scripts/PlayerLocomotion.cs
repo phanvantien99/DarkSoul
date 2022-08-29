@@ -29,9 +29,20 @@ namespace ME
         [SerializeField] float inAirTimer;
         [SerializeField] float leapVelocity;
         [SerializeField] float fallingSpeed = 45;
-        [SerializeField] float rayCastHeightOffSet = 0.5f;
+        [SerializeField] float rayCastHeightOffSet;
+
+        [Header("Handle Stair")]
+        [SerializeField] Transform stepRayUpper;
+        [SerializeField] Transform stepRayLower;
+        [SerializeField] float stepHeight = 0.3f;
+        [SerializeField] float stepSmooth = 0.1f;
 
         // [HideInInspector] public float 
+        Vector3[] directions = new Vector3[]{
+            new Vector3(0f, 0f, 1f),
+            new Vector3(1f, 0f, 1f),
+            new Vector3(-1f, 0f, 1f)
+        };
 
         private void Start()
         {
@@ -41,7 +52,11 @@ namespace ME
             playerManager = GetComponent<PlayerManager>();
             myTransform = transform;
             animatorHandler.Initialize();
+            stepRayUpper.position = new Vector3(stepRayUpper.position.x, stepHeight, stepRayUpper.position.z);
+
         }
+
+
         public void HandleAllExtraMovement()
         {
             playerSpeed = HandlePlayerSpeed();
@@ -74,6 +89,7 @@ namespace ME
             {
                 HandleRotation();
             }
+            HandleStairAndSlope();
         }
 
         float HandlePlayerSpeed()
@@ -140,7 +156,6 @@ namespace ME
             RaycastHit hit;
             Vector3 origin = transform.position;
             origin.y += rayCastHeightOffSet;
-            Vector3 targetPosition;
             targetPosition = transform.position;
 
             if (!playerManager.isGrounded)
@@ -154,59 +169,51 @@ namespace ME
                 rigidbodyPlayer.AddForce(Vector3.down * fallingSpeed * inAirTimer);
             }
 
-            // Debug.Log(Physics.SphereCast(origin, 0.2f, Vector3.down, out hit, 0.5f, groundLayers));
-            // Debug.Log(Physics.SphereCast(origin, 0.1f, Vector3.down, out hit, 0.5f, groundLayers));
-
-            if (Physics.SphereCast(origin, 0.1f, Vector3.down, out hit, 0.5f, groundLayers))
+            if (Physics.SphereCast(origin, 0.05f, Vector3.down, out hit, 0.2f, groundLayers))
             {
                 if (!playerManager.isGrounded && playerManager.isInteracting)
-                    animatorHandler.PlayTargetAnimation("Landing", true);
+                {
+                    if (inAirTimer >= 3f)
+                        animatorHandler.PlayTargetAnimation("Landing", true);
+                }
                 playerManager.isGrounded = true;
-                Vector3 rayCastHitPoint = hit.point;
-                targetPosition.y = rayCastHitPoint.y;
                 inAirTimer = 0;
                 playerManager.isInteracting = false;
-                Debug.Log(hit.point);
             }
             else
             {
-                Debug.Log(false);
                 playerManager.isGrounded = false;
             }
+        }
 
-            if (playerManager.isGrounded)
+
+
+        void HandleStairAndSlope()
+        {
+            foreach (var direction in directions)
             {
-                if (playerManager.isInteracting || inputHandler.moveAmount > 0)
+                if (Physics.Raycast(stepRayLower.position, transform.TransformDirection(Vector3.forward), 0.15f))
                 {
-                    transform.position = Vector3.Lerp(transform.position, targetPosition, Time.deltaTime);
-                }
-                else
-                {
-                    transform.position = targetPosition;
+                    Debug.Log(true);
+                    if (!Physics.Raycast(stepRayUpper.position, transform.TransformDirection(Vector3.forward), 0.2f))
+                    {
+                        rigidbodyPlayer.position -= new Vector3(0f, -stepSmooth, 0f);
+                    }
                 }
             }
         }
+
 
         private void OnDrawGizmosSelected()
         {
             Vector3 temp = transform.position;
             temp.y += rayCastHeightOffSet;
-            Gizmos.DrawRay(temp, Vector3.down * 0.5f);
-            Gizmos.DrawWireSphere(temp, 0.1f);
+            Gizmos.DrawRay(temp, Vector3.down * 0.2f);
+            Gizmos.DrawWireSphere(temp, 0.05f);
+            Gizmos.DrawRay(stepRayLower.position, transform.TransformDirection(Vector3.forward) * 0.15f);
+            Gizmos.DrawRay(stepRayUpper.position, transform.TransformDirection(Vector3.forward) * 0.2f);
         }
 
-        bool DetectIsGrounded()
-        {
-            RaycastHit hit;
-            targetPosition = transform.position;
-            targetPosition.y += 0.5f;
-            Debug.Log(targetPosition);
-            if (Physics.Raycast(targetPosition, Vector3.down, out hit, 0.21f))
-            {
-                return true;
-            }
-            return false;
-        }
 
     }
 }
